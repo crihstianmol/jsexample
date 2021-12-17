@@ -18,14 +18,34 @@
     </div>
     <script>
         'use strict';
-        const img = document.querySelector("#screenshot");
-        const screenshotButton = document.querySelector("#screenshot-button");
         var videoElement = document.querySelector('video');
+        const img = document.querySelector("#screenshot");
+        img.style.display = "none"
+        const screenshotButton = document.querySelector("#take-button");
         var videoSelect = document.querySelector('select#videoSource');
-
+        const canvas = document.createElement("canvas");
+        
         videoSelect.onchange = getStream;
-
+        
         getStream().then(getDevices).then(gotDevices);
+        
+        function takePhoto() {
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            canvas.getContext("2d").drawImage(videoElement, 0, 0);
+            // Other browsers will fall back to image/png
+            img.src = canvas.toDataURL("image/jpeg");
+            videoElement.style.display = "none"
+        };
+        
+        function retryPhoto() {
+            img.style.display = "none"
+            videoElement.style.display = "block"
+        };
+        
+        function sendPhoto(){
+            
+        }
 
         function getDevices() {
             // AFAICT in Safari this only gets default devices until gUM is called :/
@@ -34,7 +54,6 @@
 
         function gotDevices(deviceInfos) {
             window.deviceInfos = deviceInfos; // make available to console
-            console.log('Available input and output devices:', deviceInfos);
             for (const deviceInfo of deviceInfos) {
                 const option = document.createElement('option');
                 option.value = deviceInfo.deviceId;
@@ -68,21 +87,6 @@
 
         function handleError(error) {
             console.error('Error: ', error);
-        }
-
-        const canvas = document.createElement("canvas");
-
-        screenshotButton.onclick = videoElement.onclick = function () {
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
-            canvas.getContext("2d").drawImage(videoElement, 0, 0);
-            // Other browsers will fall back to image/png
-            img.src = canvas.toDataURL("image/webp");
-        };
-
-        function handleSuccess(stream) {
-            screenshotButton.disabled = false;
-            videoElement.srcObject = stream;
         }
     </script>
 </body>
